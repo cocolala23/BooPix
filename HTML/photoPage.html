@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>BooPix - Photo Booth</title>
+
+  <!-- CSS -->
+  <style>
+    body {
+      background-image: url('asset/bg frame.png');
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      margin: 0;
+      padding: 0;
+      font-family: Arial, sans-serif;
+      text-align: center;
+    }
+
+    /* Layout utama */
+    .photo-container {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      justify-content: center;
+      flex-wrap: wrap;
+      min-height: 100vh;
+      gap: 20px;
+      padding: 20px;
+    }
+
+    video {
+      width: 400px;
+      height: 300px;
+      border: 2px solid rgb(172, 172, 172);
+      border-radius: 10px;
+    }
+
+    .photo-frame {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 10px;
+      border: 0px solid rgb(117, 69, 69);
+      background:#feffb7;
+      width: 220px;
+      border-radius: 10px;
+    }
+
+    canvas {
+      width: 200px;
+      height: 150px;
+      margin: 5px;
+      background: #a4c9da;
+      border: 3px solid #fff;
+    }
+
+    /* Tombol Umum */
+    button {
+      background-color: #585858;
+      color: white;
+      padding: 10px 20px;
+      border: none;
+      font-size: 16px;
+      cursor: pointer;
+      margin: 10px;
+      border-radius: 25px;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    button:hover {
+      background-color: #45a049;
+      transform: scale(1.05);
+    }
+
+    button:active {
+      transform: scale(0.98);
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    }
+
+    .button-container {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    .sticker-container {
+      margin-top: 10px;
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .back-button {
+      position: fixed;
+      bottom: 20px;
+      left: 20px;
+    }
+
+    @media (max-width: 768px) {
+      .photo-container {
+        flex-direction: column;
+      }
+
+      video, canvas {
+        width: 100%;
+        height: auto;
+      }
+
+      .photo-frame {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Container Kamera & Frame -->
+  <div class="photo-container">
+    <video id="video" autoplay></video>
+
+    <div class="photo-frame">
+      <canvas id="canvas1"></canvas>
+      <canvas id="canvas2"></canvas>
+      <canvas id="canvas3"></canvas>
+      <canvas id="canvas4"></canvas>
+    </div>
+  </div>
+
+  <!-- Tombol-tombol utama -->
+  <div class="button-container">
+    <button id="capture">Capture Photo</button>
+    <button id="save-photo">Save Photo</button>
+    <button class="delete" onclick="deletePhoto()">Restart</button>
+    <button class="back-button" onclick="goBack()">Back</button>
+  </div>
+
+  <!-- Stiker -->
+  <div class="sticker-container">
+    <button onclick="addSticker('cat')">Kucing</button>
+    <button onclick="addSticker('dog')">Anjing</button>
+    <button onclick="addSticker('hat')">Topi</button>
+    <button onclick="addSticker('glasses')">Kacamata</button>
+  </div>
+
+  <!-- Script html2canvas -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+  <!-- Script Utama -->
+  <script>
+
+const defaultStickers = [
+    { src: 'asset/melet.png', x: 50, y: 50, w: 100, h: 100 },
+    { src: 'asset/oren2.png', x: 20, y: 20, w: 80, h: 80 }
+];
+
+window.onload = () => {
+    defaultStickers.forEach(stk => {
+        const img = new Image();
+        img.src = stk.src;
+
+        img.onload = () => {
+            canvases.forEach(canvas => {
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(img, stk.x, stk.y, stk.w, stk.h);
+            });
+        };
+    });
+};
+
+
+    const video = document.getElementById('video');
+    const captureButton = document.getElementById('capture');
+    const saveButton = document.getElementById('save-photo');
+    const canvases = [
+      document.getElementById('canvas1'),
+      document.getElementById('canvas2'),
+      document.getElementById('canvas3'),
+      document.getElementById('canvas4')
+    ];
+    let photoIndex = 0;
+
+    // Aktifkan kamera
+    navigator.mediaDevices.getUserMedia({ video: true })
+      .then(stream => {
+        video.srcObject = stream;
+      })
+      .catch(err => {
+        console.error("Error accessing camera: ", err);
+      });
+
+    // Capture foto
+    captureButton.addEventListener('click', () => {
+      if (photoIndex < 4) {
+        const context = canvases[photoIndex].getContext('2d');
+        context.drawImage(video, 0, 0, canvases[photoIndex].width, canvases[photoIndex].height);
+        photoIndex++;
+      } else {
+        alert("Frame sudah penuh! Simpan atau hapus foto sebelum mengambil yang baru.");
+      }
+    });
+
+    // Simpan hasil gabungan
+    // Simpan seluruh frame (termasuk border & canvas)
+saveButton.addEventListener('click', () => {
+  const frameElement = document.querySelector('.photo-frame');
+
+  html2canvas(frameElement).then(canvas => {
+    const link = document.createElement('a');
+    link.download = 'BooPix-Photo-With-Frame.png';
+    link.href = canvas.toDataURL();
+    link.click();
+  });
+      const finalCanvas = document.createElement('canvas');
+      finalCanvas.width = 200;
+      finalCanvas.height = 150 * photoIndex;
+
+      const finalContext = finalCanvas.getContext('2d');
+      for (let i = 0; i < photoIndex; i++) {
+        finalContext.drawImage(canvases[i], 0, i * 150, 200, 150);
+      }
+
+      const link = document.createElement('a');
+      link.download = 'BooPix-Photo.png';
+      link.href = finalCanvas.toDataURL();
+      link.click();
+    });
+
+    // Hapus semua foto
+    function deletePhoto() {
+      canvases.forEach(canvas => {
+        const ctx = canvas.getContext('2d');
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+      });
+      photoIndex = 0;
+      alert("Semua foto telah dihapus.");
+    }
+
+    // Kembali ke halaman utama
+    function goBack() {
+      window.location.href = "index.html";
+    }
+
+    // Daftar stiker
+    const stickers = {
+      cat: "asset/bulan.png",
+      dog: "asset/melet.png",
+      hat: "asset/oren1.png",
+      glasses: "asset/oren2.png"
+    };
+
+    // Tambahkan stiker ke foto
+    function addSticker(type) {
+      if (!stickers[type]) return;
+
+      let stickerAdded = false;
+
+      canvases.forEach((canvas) => {
+        const ctx = canvas.getContext('2d');
+        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        let hasImage = false;
+
+        for (let i = 0; i < imageData.data.length; i += 4) {
+          if (imageData.data[i + 3] !== 0) {
+            hasImage = true;
+            break;
+          }
+        }
+
+        if (hasImage) {
+          const sticker = new Image();
+          sticker.src = stickers[type];
+          sticker.onload = function () {
+            ctx.drawImage(sticker, 50, 50, 100, 100);
+          };
+          stickerAdded = true;
+        }
+      });
+
+      if (!stickerAdded) {
+        alert("Ambil foto terlebih dahulu sebelum menambahkan stiker!");
+      }
+    }
+  </script>
+</body>
+</html>
