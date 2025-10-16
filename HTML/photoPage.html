@@ -1,14 +1,13 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>BooPix - Photo Booth</title>
-
   <!-- CSS -->
   <style>
     body {
-      background-image: url('asset/bg-ungu.png');
       background-size: cover;
       background-position: center;
       background-repeat: no-repeat;
@@ -17,7 +16,6 @@
       font-family: Arial, sans-serif;
       text-align: center;
     }
-
     /* Layout utama */
     .photo-container {
       display: flex;
@@ -29,40 +27,36 @@
       gap: 20px;
       padding: 20px;
     }
-
     video {
-      width: 400px;
-      height: 300px;
+      width: 100%;
+      max-width: 400px; /* Max width for video */
+      height: auto; /* Maintain aspect ratio */
       border: 2px solid;
       border-radius: 10px;
     }
-
     .photo-frame {
       display: flex;
       flex-direction: column;
       align-items: center;
       padding: 10px;
-      border: 0px solid rgb(117, 69, 69);
-      background:#feffb7;
-      width: 220px;
+      background: #feffb7;
+      width: 100%; /* Full width */
+      max-width: 220px; /* Max width for photo frame */
       border-radius: 10px;
+      position: relative; /* Required for absolute positioning of stickers */
     }
-
     canvas {
-      width: 200px;
-      height: 150px;
+      width: 100%; /* Full width */
+      height: auto; /* Maintain aspect ratio */
       margin: 5px;
       background: #a4c9da;
       border: 3px solid #fff;
       border-radius: 10px;
     }
-
     /* Tombol Umum */
     button {
-      background: rgb(82, 78, 78)fb7;
+      background: rgb(82, 78, 78);
       color: rgb(255, 255, 255);
-      transition: background-position 0.5s, transform 0.2s;
-      transition: 0.3s;
       padding: 10px 20px;
       border: none;
       font-size: 16px;
@@ -71,114 +65,129 @@
       border-radius: 25px;
       transition: all 0.3s ease;
     }
-
     button:hover {
       background-color: #a7d8f8;
       transform: scale(1.05);
     }
-
     button:active {
       transform: scale(0.98);
-   
     }
-
     .button-container {
       display: flex;
       flex-wrap: wrap;
       justify-content: center;
       gap: 10px;
       margin-bottom: 20px;
-      background: rgb(82, 78, 78)fb7;
+      background: rgb(82, 78, 78);
     }
-
     .sticker-container {
-      margin-top: 10px;
-      display: flex;
+      display: none; /* Initially hidden */
       justify-content: center;
       flex-wrap: wrap;
       gap: 10px;
+      margin-top: 10px;
     }
-
+    .sticker-group {
+      margin: 10px;
+      border: 1px solid #ccc;
+      border-radius: 10px;
+      padding: 10px;
+      width: 250px; /* Width for sticker groups */
+    }
+    .sticker {
+      width: 50px; /* Width of each sticker */
+      height: 50px; /* Height of each sticker */
+      cursor: pointer;
+      margin: 5px;
+      display: inline-block;
+      position: relative; /* Required for absolute positioning */
+    }
     .back-button {
       position: fixed;
       bottom: 20px;
       left: 20px;
     }
-
     @media (max-width: 768px) {
       .photo-container {
         flex-direction: column;
       }
-
       video, canvas {
         width: 100%;
         height: auto;
       }
-
       .photo-frame {
         width: 100%;
+        max-width: none; /* Remove max-width on smaller screens */
       }
     }
   </style>
 </head>
 <body>
-
-  <!-- Container Kamera & Frame -->
+<main>
+<div class="space-photo">
   <div class="photo-container">
     <video id="video" autoplay></video>
-
-    <div class="photo-frame">
+    <div class="photo-frame" id="photo-frame">
       <canvas id="canvas1"></canvas>
       <canvas id="canvas2"></canvas>
       <canvas id="canvas3"></canvas>
       <canvas id="canvas4"></canvas>
     </div>
   </div>
-
   <!-- Tombol-tombol utama -->
   <div class="button-container">
     <button id="capture">Capture Photo</button>
+    <button id="sticker-toggle">Stickers</button>
     <button id="save-photo">Save Photo</button>
     <button class="delete" onclick="deletePhoto()">Restart</button>
     <button class="back-button" onclick="goBack()">Back</button>
   </div>
-
-  <!-- Stiker -->
-  <div class="sticker-container">
-    <button onclick="addSticker('cat')">Kucing</button>
-    <button onclick="addSticker('dog')">Anjing</button>
-    <button onclick="addSticker('hat')">Topi</button>
-    <button onclick="addSticker('glasses')">Kacamata</button>
+  <!-- Sticker Groups -->
+  <div class="sticker-container" id="sticker-groups">
+    <div class="sticker-group" id="group1">
+      <h4>Group 1</h4>
+      <img src="../asset/RANDOM/headphone.png" class="sticker" draggable="true" ondragstart="drag(event)" id="sticker1">
+      <img src="../asset/CAT/cat4.png" class="sticker" draggable="true" ondragstart="drag(event)" id="sticker2">
+      <img src="../asset/RANDOM/duck.png" class="sticker" draggable="true" ondragstart="drag(event)" id="sticker3">
+      <img src="../asset/CAT/oren1.png" class="sticker" draggable="true" ondragstart="drag(event)" id="sticker5">
+      <img src="../asset/CAT/oren2.png" class="sticker" draggable="true" ondragstart="drag(event)" id="sticker6">
+      <img src="../asset/CAT/solatip.png" class="sticker" draggable="true" ondragstart="drag(event)" id="sticker7">
+    </div>
+    <div class="sticker-group" id="group2">
+      <h4>Group 2</h4>
+      <img src="../asset/RANDOM/loveH.png" class="sticker" draggable="true" ondragstart="drag(event)" id="sticker4">
+      <!-- Add more stickers here -->
+    </div>
+    <div class="sticker-group" id="group3">
+      <h4>Group 3</h4>
+      <!-- Add stickers for group 3 -->
+    </div>
   </div>
-
+</div>
+</main>
   <!-- Script html2canvas -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-
   <!-- Script Utama -->
   <script>
-
-const defaultStickers = [
-    { src: 'asset/melet.png', x: 50, y: 50, w: 100, h: 100 },
-    { src: 'asset/oren2.png', x: 20, y: 20, w: 80, h: 80 }
-];
-
-window.onload = () => {
-    defaultStickers.forEach(stk => {
+    const defaultStickers = [
+      { src: 'asset/melet.png', x: 50, y: 50, w: 100, h: 100 },
+      { src: 'asset/oren2.png', x: 20, y: 20, w: 80, h: 80 }
+    ];
+    window.onload = () => {
+      defaultStickers.forEach(stk => {
         const img = new Image();
         img.src = stk.src;
-
         img.onload = () => {
-            canvases.forEach(canvas => {
-                const ctx = canvas.getContext('2d');
-                ctx.drawImage(img, stk.x, stk.y, stk.w, stk.h);
-            });
+          canvases.forEach(canvas => {
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, stk.x, stk.y, stk.w, stk.h);
+          });
         };
-    });
-};
-
-
+      });
+    };
     const video = document.getElementById('video');
     const captureButton = document.getElementById('capture');
+    const stickerToggleButton = document.getElementById('sticker-toggle');
     const saveButton = document.getElementById('save-photo');
     const canvases = [
       document.getElementById('canvas1'),
@@ -187,7 +196,6 @@ window.onload = () => {
       document.getElementById('canvas4')
     ];
     let photoIndex = 0;
-
     // Aktifkan kamera
     navigator.mediaDevices.getUserMedia({ video: true })
       .then(stream => {
@@ -196,7 +204,6 @@ window.onload = () => {
       .catch(err => {
         console.error("Error accessing camera: ", err);
       });
-
     // Capture foto
     captureButton.addEventListener('click', () => {
       if (photoIndex < 4) {
@@ -207,33 +214,27 @@ window.onload = () => {
         alert("Frame sudah penuh! Simpan atau hapus foto sebelum mengambil yang baru.");
       }
     });
-
     // Simpan hasil gabungan
-    // Simpan seluruh frame (termasuk border & canvas)
-saveButton.addEventListener('click', () => {
-  const frameElement = document.querySelector('.photo-frame');
-
-  html2canvas(frameElement).then(canvas => {
-    const link = document.createElement('a');
-    link.download = 'BooPix-Photo-With-Frame.png';
-    link.href = canvas.toDataURL();
-    link.click();
-  });
+    saveButton.addEventListener('click', () => {
+      const frameElement = document.querySelector('.photo-frame');
+      html2canvas(frameElement).then(canvas => {
+        const link = document.createElement('a');
+        link.download = 'BooPix-Photo-With-Frame.png';
+        link.href = canvas.toDataURL();
+        link.click();
+      });
       const finalCanvas = document.createElement('canvas');
       finalCanvas.width = 200;
       finalCanvas.height = 150 * photoIndex;
-
       const finalContext = finalCanvas.getContext('2d');
       for (let i = 0; i < photoIndex; i++) {
         finalContext.drawImage(canvases[i], 0, i * 150, 200, 150);
       }
-
       const link = document.createElement('a');
       link.download = 'BooPix-Photo.png';
       link.href = finalCanvas.toDataURL();
       link.click();
     });
-
     // Hapus semua foto
     function deletePhoto() {
       canvases.forEach(canvas => {
@@ -243,52 +244,48 @@ saveButton.addEventListener('click', () => {
       photoIndex = 0;
       alert("Semua foto telah dihapus.");
     }
-
     // Kembali ke halaman utama
     function goBack() {
       window.location.href = "index.html";
     }
-
     // Daftar stiker
     const stickers = {
-      cat: "asset/bulan.png",
-      dog: "asset/melet.png",
-      hat: "asset/oren1.png",
-      glasses: "asset/oren2.png"
+      headphone: "../asset/RANDOM/headphone.png",
+      cat: "../asset/CAT/cat4.png",
+      duck: "../asset/RANDOM/duck.png",
+      loveH: "../asset/RANDOM/loveH.png"
     };
-
-    // Tambahkan stiker ke foto
-    function addSticker(type) {
-      if (!stickers[type]) return;
-
-      let stickerAdded = false;
-
-      canvases.forEach((canvas) => {
-        const ctx = canvas.getContext('2d');
-        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-        let hasImage = false;
-
-        for (let i = 0; i < imageData.data.length; i += 4) {
-          if (imageData.data[i + 3] !== 0) {
-            hasImage = true;
-            break;
-          }
-        }
-
-        if (hasImage) {
-          const sticker = new Image();
-          sticker.src = stickers[type];
-          sticker.onload = function () {
-            ctx.drawImage(sticker, 50, 50, 100, 100);
-          };
-          stickerAdded = true;
-        }
-      });
-
-      if (!stickerAdded) {
-        alert("Ambil foto terlebih dahulu sebelum menambahkan stiker!");
-      }
+    // Tambahkan drag and drop functionality
+    function drag(event) {
+      event.dataTransfer.setData("text", event.target.id);
     }
+    const photoFrame = document.getElementById('photo-frame');
+    photoFrame.addEventListener('dragover', (event) => {
+      event.preventDefault(); // Prevent default to allow drop
+    });
+    photoFrame.addEventListener('drop', (event) => {
+      event.preventDefault();
+      const stickerId = event.dataTransfer.getData("text");
+      const stickerImg = document.getElementById(stickerId);
+      const rect = photoFrame.getBoundingClientRect();
+      const x = event.clientX - rect.left - 25; // Centering sticker
+      const y = event.clientY - rect.top - 25; // Centering sticker
+      const ctx = canvases[0].getContext('2d'); // Use the first canvas for now
+      const sticker = new Image();
+      sticker.src = stickerImg.src;
+      sticker.onload = function () {
+        ctx.drawImage(sticker, x, y, 50, 50); // Draw sticker at drop position
+      };
+    });
+    // Toggle sticker groups visibility
+    stickerToggleButton.addEventListener('click', () => {
+      const stickerGroups = document.getElementById('sticker-groups');
+      if (stickerGroups.style.display === "none" || stickerGroups.style.display === "") {
+        stickerGroups.style.display = "flex"; // Show sticker groups
+      } else {
+        stickerGroups.style.display = "none"; // Hide sticker groups
+      }
+    });
   </script>
 </body>
 </html>

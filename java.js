@@ -12,7 +12,6 @@ const canvases = [
 let photoIndex = 0;
 
 // Aktifkan Kamera
-document.createElement
 navigator.mediaDevices.getUserMedia({ video: true })
     .then(stream => {
         video.srcObject = stream;
@@ -21,16 +20,17 @@ navigator.mediaDevices.getUserMedia({ video: true })
         console.error("Error accessing camera: ", err);
     });
 
-// Event listener for the Snap Your Life button
-document.getElementById('snapButton').addEventListener('click', function() {
-    window.location.href = 'photoPage.html';
-});
+// Event listener untuk tombol pindah halaman
+const snapButton = document.getElementById('snapButton');
+if (snapButton) {
+    snapButton.addEventListener('click', () => {
+        window.location.href = 'photoPage.html';
+    });
+}
 
 // Tangkap Foto & Masukkan ke Frame
 captureButton.addEventListener('click', () => {
-    console.log("Capture button clicked");
-
-    if (photoIndex < 4) {
+    if (photoIndex < canvases.length) {
         const context = canvases[photoIndex].getContext('2d');
         context.drawImage(video, 0, 0, canvases[photoIndex].width, canvases[photoIndex].height);
         photoIndex++;
@@ -42,24 +42,26 @@ captureButton.addEventListener('click', () => {
 // Simpan Foto ke Galeri
 saveButton.addEventListener('click', () => {
     const finalCanvas = document.createElement('canvas');
-    finalCanvas.width = 200;
-    finalCanvas.height = 600; // Sesuai ukuran 4 gambar
+    const frameWidth = 200;
+    const frameHeight = 150;
+    finalCanvas.width = frameWidth;
+    finalCanvas.height = frameHeight * canvases.length;
 
     const finalContext = finalCanvas.getContext('2d');
 
     // Gabungkan 4 gambar ke dalam 1 file
     canvases.forEach((canvas, index) => {
-        finalContext.drawImage(canvas, 0, index * 150, 200, 150);
+        finalContext.drawImage(canvas, 0, index * frameHeight, frameWidth, frameHeight);
     });
 
     // Download hasil foto
     const link = document.createElement('a');
     link.download = 'BooPix-Photo.png';
-    link.href = finalCanvas.toDataURL();
+    link.href = finalCanvas.toDataURL('image/png');
     link.click();
 });
 
 // Fungsi kembali ke halaman utama
 function goBack() {
-    window.location.href = "index.html";
+    window.location.href = "../HTML/index.html";
 }
